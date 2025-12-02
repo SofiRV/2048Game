@@ -114,17 +114,23 @@ public class MainActivity extends AppCompatActivity {
     private void updateCell(int row, int col) {
         TextView cell = cellTextViews[row][col];
         if (cell == null) return;
+
         int value = grid[row][col];
+
         if (value == 0) {
             cell.setText("");
             cell.setBackgroundColor(ContextCompat.getColor(this, R.color.baby_pink));
         } else {
             cell.setText(String.valueOf(value));
-            cell.setBackgroundColor(
-                    colorMap.getOrDefault(value, ContextCompat.getColor(this, R.color.baby_pink))
-            );
+
+            int color = colorMap.containsKey(value)
+                    ? colorMap.get(value)
+                    : ContextCompat.getColor(this, R.color.pink_big); // <-- para > 2048
+
+            cell.setBackgroundColor(color);
         }
     }
+
 
     private void addRandomTile() {
         List<int[]> emptyCells = new ArrayList<>();
@@ -153,6 +159,7 @@ public class MainActivity extends AppCompatActivity {
         colorMap.put(512, ContextCompat.getColor(this, R.color.pink_512));
         colorMap.put(1024, ContextCompat.getColor(this, R.color.pink_1024));
         colorMap.put(2048, ContextCompat.getColor(this, R.color.pink_2048));
+
     }
 
     public void moveRight() {
