@@ -33,6 +33,10 @@ public class MainActivity extends AppCompatActivity {
     private static final String PREFS_NAME = "game_prefs";
     private static final String HIGH_SCORE_KEY = "high_score";
     private Button resetButton;
+    private Button undoButton;
+    private int[][] previousGrid = new int[4][4];
+    private int previousScore = 0;
+
 
 
 
@@ -59,6 +63,8 @@ public class MainActivity extends AppCompatActivity {
         highScoreTextView = findViewById(R.id.high_score_value);
         resetButton = findViewById(R.id.button_reset);
         resetButton.setOnClickListener(v -> resetGame());
+        undoButton = findViewById(R.id.button_undo);
+        undoButton.setOnClickListener(v -> undoMove());
 
 
         SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
@@ -163,6 +169,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void moveRight() {
+        savePreviousState();
         boolean moved = false;
         for (int i = 0; i < 4; i++) moved |= moveRowRight(i);
         if (moved) {
@@ -172,6 +179,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void moveLeft() {
+        savePreviousState();
         boolean moved = false;
         for (int i = 0; i < 4; i++) moved |= moveRowLeft(i);
         if (moved) {
@@ -181,6 +189,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void moveUp() {
+        savePreviousState();
         boolean moved = false;
         for (int i = 0; i < 4; i++) moved |= moveColumnUp(i);
         if (moved) {
@@ -190,6 +199,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void moveDown() {
+        savePreviousState();
         boolean moved = false;
         for (int i = 0; i < 4; i++) moved |= moveColumnDown(i);
         if (moved) {
@@ -391,4 +401,18 @@ public class MainActivity extends AppCompatActivity {
 
         return moved;
     }
+    private void savePreviousState() {
+        for (int i = 0; i < 4; i++) {
+            System.arraycopy(grid[i], 0, previousGrid[i], 0, 4);
+        }
+        previousScore = score;
+    }
+    private void undoMove() {
+        for (int i = 0; i < 4; i++) {
+            System.arraycopy(previousGrid[i], 0, grid[i], 0, 4);
+        }
+        score = previousScore;
+        updateUI();
+    }
+
 }

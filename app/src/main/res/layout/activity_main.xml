@@ -276,6 +276,17 @@
             android:textColor="@color/black"
             android:textSize="18sp"
             android:layout_marginTop="20dp"/>
+        <Button
+            android:id="@+id/button_undo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:backgroundTint="@color/baby_pink"
+            android:padding="10dp"
+            android:text="@string/step_back"
+            android:textColor="@color/black"
+            android:textSize="18sp"
+            android:layout_marginTop="20dp"/>
 
     </LinearLayout>
 
