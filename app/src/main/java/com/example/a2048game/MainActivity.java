@@ -20,6 +20,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
+import java.util.Stack;
+
 public class MainActivity extends AppCompatActivity {
 
     int[][] grid = new int[4][4];
@@ -34,8 +36,12 @@ public class MainActivity extends AppCompatActivity {
     private static final String HIGH_SCORE_KEY = "high_score";
     private Button resetButton;
     private Button undoButton;
-    private int[][] previousGrid = new int[4][4];
-    private int previousScore = 0;
+    private static final int MAX_UNDOS = 4;
+    private int undosLeft = MAX_UNDOS;
+    private Stack<int[][]> gridHistory = new Stack<>();
+    private Stack<Integer> scoreHistory = new Stack<>();
+
+
 
 
 
@@ -67,6 +73,7 @@ public class MainActivity extends AppCompatActivity {
         undoButton.setOnClickListener(v -> undoMove());
 
 
+
         SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
         highScore = prefs.getInt(HIGH_SCORE_KEY, 0);
         highScoreTextView.setText(String.valueOf(highScore));
@@ -80,6 +87,8 @@ public class MainActivity extends AppCompatActivity {
 
         initColormap();
         startGame();
+        updateUndoButton();
+
     }
 
     private void startGame() {
@@ -97,6 +106,11 @@ public class MainActivity extends AppCompatActivity {
         score=0;
         startGame();
         updateUI();
+        undosLeft = MAX_UNDOS;
+        gridHistory.clear();
+        scoreHistory.clear();
+        updateUndoButton();
+
     }
 
     private boolean isGameOver() {
@@ -175,6 +189,9 @@ public class MainActivity extends AppCompatActivity {
         if (moved) {
             addRandomTile();
             updateUI();
+        }else if (!gridHistory.isEmpty()) {
+            gridHistory.pop();
+            scoreHistory.pop();
         }
     }
 
@@ -185,6 +202,9 @@ public class MainActivity extends AppCompatActivity {
         if (moved) {
             addRandomTile();
             updateUI();
+        } else if (!gridHistory.isEmpty()) {
+            gridHistory.pop();
+            scoreHistory.pop();
         }
     }
 
@@ -195,6 +215,9 @@ public class MainActivity extends AppCompatActivity {
         if (moved) {
             addRandomTile();
             updateUI();
+        }else if (!gridHistory.isEmpty()) {
+            gridHistory.pop();
+            scoreHistory.pop();
         }
     }
 
@@ -205,6 +228,9 @@ public class MainActivity extends AppCompatActivity {
         if (moved) {
             addRandomTile();
             updateUI();
+        }else if (!gridHistory.isEmpty()) {
+            gridHistory.pop();
+            scoreHistory.pop();
         }
     }
 
@@ -212,6 +238,8 @@ public class MainActivity extends AppCompatActivity {
         for (int i = 0; i < 4; i++)
             for (int j = 0; j < 4; j++)
                 updateCell(i, j);
+        updateUndoButton();
+
 
         scoreTextView.setText(String.valueOf(score));
         highScoreTextView.setText(String.valueOf(highScore));
@@ -226,6 +254,9 @@ public class MainActivity extends AppCompatActivity {
 
         if (isGameOver()) {
             Toast.makeText(this, "Game Over", Toast.LENGTH_LONG).show();
+            undosLeft = MAX_UNDOS;
+            gridHistory.clear();
+            scoreHistory.clear();
         }
     }
 
@@ -402,17 +433,39 @@ public class MainActivity extends AppCompatActivity {
         return moved;
     }
     private void savePreviousState() {
+        if (undosLeft <= 0) return;
+
+        int[][] copy = new int[4][4];
         for (int i = 0; i < 4; i++) {
-            System.arraycopy(grid[i], 0, previousGrid[i], 0, 4);
+            System.arraycopy(grid[i], 0, copy[i], 0, 4);
         }
-        previousScore = score;
+
+        gridHistory.push(copy);
+        scoreHistory.push(score);
     }
+
+
+
     private void undoMove() {
-        for (int i = 0; i < 4; i++) {
-            System.arraycopy(previousGrid[i], 0, grid[i], 0, 4);
+        if (undosLeft <= 0 || gridHistory.isEmpty()) {
+            Toast.makeText(this, "No quedan undos", Toast.LENGTH_SHORT).show();
+            return;
         }
-        score = previousScore;
+
+        grid = gridHistory.pop();
+        score = scoreHistory.pop();
+        undosLeft--;
+
         updateUI();
+        updateUndoButton();
     }
+
+    private void updateUndoButton(){
+        undoButton.setEnabled(undosLeft>0);
+        undoButton.setAlpha(undosLeft > 0 ? 1f : 0.5f);
+        undoButton.setText("Step back " + undosLeft + "/" + MAX_UNDOS);
+
+    }
+
 
 }
